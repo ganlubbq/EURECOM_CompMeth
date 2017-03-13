@@ -1,0 +1,11 @@
+mkdir -p test/
+for TEST in 0 1 2
+do
+  for N in 64 256 1024 4096
+  do
+    echo Starting test n. ${TEST} with N = ${N}
+    ./fft $N $TEST | cut -f 1,2 -d ',' | tr ',' ' '  | sed '1d' > test/TEST_${TEST}_N_${N}.txt
+    echo Test concluded
+  done
+done
+echo Distortion test completed

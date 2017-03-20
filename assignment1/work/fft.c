@@ -5,6 +5,7 @@
 
 #include "complex.h"
 
+
 #define PI 3.14159265359
 #define MAXPOW 24
 
@@ -392,10 +393,17 @@ void fft_distortion_test(int N,                              // dimension of FFT
   // Compute Distortion statistics
   mean_error = 0.0;
   mean_in = 0.0;
+
+  //for (i=0;i<N;i++) {
+  //mean_in += data[i].r*data[i].r + data[i].i*data[i].i;
+  //mean_error += pow(data[i].r-(double)data16[i].r/32767.0,2) + pow(data[i].i-(double)data16[i].i/32767.0,2);
+  //}
+
   for (i=0;i<N;i++) {
     mean_in += data[i].r*data[i].r + data[i].i*data[i].i;
-    mean_error += pow((data[i].r-((double)data32[i].r/32767.0)),2) + pow((data[i].i-((double)data32[i].i/32767.0)),2);
+    mean_error += pow(data[i].r-(double)data32[i].r/32767.0,2) + pow(data[i].i-(double)data32[i].i/32767.0,2);
   }
+
 
   SNR = 10*log10(mean_in/mean_error);
   // printf("%d %d %d %d %d %d %d : %f\n",scale[0],scale[1],scale[2],scale[3],scale[4],scale[5],scale[6],SNR);
@@ -424,6 +432,8 @@ void main(int argc, char *argv[])
   struct complex16 *data16;
   struct complex32 *data32;
 
+  randominit();
+  srand((unsigned)time(NULL));
 
   if (argc!= 3) {
     printf("fft size(16-4096) test(0-2)!!\n");
@@ -472,7 +482,7 @@ void main(int argc, char *argv[])
 
   printf("res_%d = [ \n",N);
 
-  for (input_dB=-40;input_dB<0;input_dB+=1) {
+  for (input_dB=-40;input_dB<0;input_dB+=.125) {
 
 
     switch (N) {

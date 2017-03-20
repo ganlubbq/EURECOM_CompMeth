@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -O3
+CFLAGS = -Os
 
 # Utility routines
 UTIL_OBJS += taus.o fixed_point.o rangen_double.o
@@ -14,11 +14,10 @@ $(OBJ) : %.o : %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 fft.o: fft.c
-	$(CC)  -c fft.c -o fft.o $(CFLAGS)  
+	$(CC)  -c fft.c -o fft.o $(CFLAGS)
 
 fft: $(OBJ) fft.o
 	$(CC)  $(OBJ) fft.o -o fft -lm
 
 clean:
-	rm -f *.o 
-
+	rm -f *.o

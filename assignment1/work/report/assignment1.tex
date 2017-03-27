@@ -18,16 +18,18 @@
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
+\documentclass[paper=a4, fontsize=12pt]{scrartcl} % A4 paper and 11pt font size
 
 \usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
 \usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
 \usepackage[english]{babel} % English language/hyphenation
 \usepackage{amsmath,amsfonts,amsthm} % Math packages
 \usepackage{listings}
-\lstset{basicstyle=\ttfamily, breaklines=truem}
+\lstset{basicstyle=\small\ttfamily, breaklines=truem}
 
 \usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+\usepackage{tikz}
+\usepackage[]{graphicx}
 
 \usepackage{sectsty} % Allows customizing section commands
 \allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
@@ -48,6 +50,7 @@
 
 \setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
 
+\linespread{1.5}
 %----------------------------------------------------------------------------------------
 %	TITLE SECTION
 %----------------------------------------------------------------------------------------
@@ -76,82 +79,140 @@
 
 \section{Introduction}
 
-In this laboratory, we studied the effects of fixed-point reppresentation for a
+In this laboratory, we studied the effects of fixed-point representation for a
 well known algorithm in Digital Signal Processing, the \textbf{FFT}, a fast algorithm
 for computing the DFT of a signal.
 
-
+\newpage
 
 \section{Fixed-point operation routines}
 
-Let's analyze how fixed-point numbers are reppresented and how we can emulate
+Let's analyze how fixed-point numbers are represented and how we can emulate
 arithmetic operations with them.
 
-\subsection{Fix Multiplication on 18 bits}
+\subsection{Multiplication in Q15}
 
-This is the code for implementing a multiplication with two operands in Q17.
+This is the code for implementing a multiplication with two operands in Q15.
 
 \lstinputlisting[firstline=1,lastline=3, language=C]{code/fixed_point.c}
 
 Simply, it casts both operands in 32 bit integers, performs the multiplication and
 takes the most significant bits of the result by shifting to the right of
-15 positions. Before returing, the result is casted back to 16 bits for claraty.
+15 positions. Before returning, the result is casted back to \texttt{short}.
 
-%------------------------------------------------
+\subsection{Multiplication for Q25 $\times$ Q18}
 
-\subsection{Heading on level 2 (subsection)}
+Here the situation is slightly different but the procedure is similar: operands
+are casted in 64 bits (to avoid overflow issues) and the right most 25 bits are
+taken as result.
 
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
-\begin{align}
-A =
-\begin{bmatrix}
-A_{11} & A_{21} \\
-A_{21} & A_{22}
-\end{bmatrix}
-\end{align}
-Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.
+\lstinputlisting[firstline=14,lastline=16, language=C]{code/fixed_point.c}
 
-%------------------------------------------------
 
-\subsubsection{Heading on level 3 (subsubsection)}
+\subsection{Saturated addition in Q15 and Q25}
 
-\lipsum[3] % Dummy text
+This is the code for implementing a saturated addition with two operands in Q15.
 
-\paragraph{Heading on level 4 (paragraph)}
+\lstinputlisting[firstline=5,lastline=12, language=C]{code/fixed_point.c}
 
-\lipsum[6] % Dummy text
+It extends the operands on 32 bits and it checks whether the result will be an
+overflow or not. If so, it returns the maximum number representable on 16 bits
+($2^{16}-1 = 32767$), positive or negative according to the case. If not, it simply
+returns the normal sum.\\
 
-%----------------------------------------------------------------------------------------
-%	PROBLEM 2
-%----------------------------------------------------------------------------------------
+For the operation in Q25, the procedure is exactly the same with the exception
+of the return value in case of overflow, which is now $2^{24}-1$
 
-\section{Lists}
+\lstinputlisting[firstline=18,lastline=25, language=C]{code/fixed_point.c}
 
-%------------------------------------------------
+\subsection{4-point Butterfly in Q15}
+This is the code I modified for computing the simulated results in Q15.
+\lstinputlisting[firstline=28,lastline=44, language=C]{code/fixed_point.c}
 
-\subsection{Example of list (3*itemize)}
-\begin{itemize}
-	\item First item in a list
-		\begin{itemize}
-		\item First item in a list
-			\begin{itemize}
-			\item First item in a list
-			\item Second item in a list
-			\end{itemize}
-		\item Second item in a list
-		\end{itemize}
-	\item Second item in a list
-\end{itemize}
+\subsection{4-point Butterfly in Xilinx DSP format}
+This is the code I modified for computing the simulated results in the Xilinx DSP format.
+\lstinputlisting[firstline=47,lastline=63, language=C]{code/fixed_point.c}
 
-%------------------------------------------------
+\section{Twiddle factor quantization}
 
-\subsection{Example of list (enumerate)}
-\begin{enumerate}
-\item First item in a list
-\item Second item in a list
-\item Third item in a list
-\end{enumerate}
+\begin{minipage}{.4\textwidth}
+\includegraphics[width = \textwidth]{fig1.jpg}
+\end{minipage}
+\hspace{.5cm}
+\begin{minipage}{.6\textwidth}
+Generally twiddle factors are chosen such that the lay in the unity circle in
+the complex domain and it's written as
+\begin{equation}
+    \textbf{W}_i = \left[ \cos(i2\pi/N), -\sin(i2\pi/N) \right]
+\end{equation}
+However this might not always be the case when we deal with
+quantization and fixed point representation.
+\end{minipage}
+What is currently done is to take always the \texttt{floor} value for the sine
+and cosine; another possible strategy for computing the twiddle factor could be
+calculating all four possible combinations of approximations and taking the one
+which is less distant from the unity circle.
 
-%----------------------------------------------------------------------------------------
+\section{Distortion test}
+The distortion test is computed as follows.
+\begin{equation}
+    \bar x^{in} = \sum_{i=0}^{N-1}\left[ \Re\left\{ x^{in}_i \right\}^2 +
+                                         \Im\left\{ x^{in}_i \right\}^2 \right]
+\end{equation}
+\begin{equation}
+    \bar \epsilon = \sum_{i=0}^{N-1}\left[  \Re\left\{ x^{in}_i - \dfrac{x^{FP}_i}{2^{16}-1} \right\}^2 +
+                                            \Im\left\{ x^{in}_i - \dfrac{x^{FP}_i}{2^{16}-1} \right\}^2 \right]
+\end{equation}
+
+\begin{equation}
+    SNR = 10\log_{10}\dfrac{\bar x^{in}}{\bar \epsilon}
+\end{equation}
+
+This is the code for doing so.
+
+\lstinputlisting[firstline=65,lastline=73, language=C]{code/fixed_point.c}
+
+This benchmarking has been performed on three signals. The first test is with a
+sinusoidal input. The second a random 16-QAM signal as input and finally the third
+is a white-noise signal.
+
+\section{Results}
+These are the results I got in the two cases. The first one is the traditional
+Q15 format.
+
+\begin{minipage}{.5\textwidth}
+    \includegraphics[width = \textwidth]{../figQ15/TEST_0.pdf}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+    \includegraphics[width = \textwidth]{../figQ15/TEST_1.pdf}
+\end{minipage}
+
+\begin{minipage}{\textwidth}
+    \centering
+    \includegraphics[width = 0.5\textwidth]{../figQ15/TEST_2.pdf}
+\end{minipage}
+
+As we can see, in all the three tests, the system suffers performance degradation
+when the input signal power starts to become higher and higher, possibly due to
+overflow/underflow in some butterfly stage. As expected, the lower the
+number of FFT points, the higher is the breakdown point.\\
+
+The following one, on the other hand, is the one with the Xilinx DSP format.
+
+\begin{minipage}{.5\textwidth}
+    \includegraphics[width = \textwidth]{../figQ24/TEST_0.pdf}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+    \includegraphics[width = \textwidth]{../figQ24/TEST_1.pdf}
+\end{minipage}
+
+\begin{minipage}{\textwidth}
+    \centering
+    \includegraphics[width = 0.5\textwidth]{../figQ24/TEST_2.pdf}
+\end{minipage}
+
+With sinusoidal input, the behaviour is not so different from the Q15 but the results for
+the other two tests is interesting. It seems that this particular format for fixed point
+can avoid destructive overflows.
 
 \end{document}

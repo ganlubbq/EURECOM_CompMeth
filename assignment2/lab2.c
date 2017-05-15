@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define ITER 1000
+#define ITER 100000
 
 
 void componentwise_multiply_real_scalar(int16_t *x,int16_t *y,int16_t *z, uint16_t N);

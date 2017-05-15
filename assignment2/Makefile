@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -Wall -mmmx -msse -msse2 -mssse3 -msse4 -mavx2 -O0 -D__DEBUG__ -g -ggdb -fno-unroll-loops 
+override CFLAGS += -Wall -mmmx -msse -msse2 -mssse3 -msse4 -D__PYTHON__ -g -ggdb 
 
 # Utility routines
 UTIL_OBJS += lab2.o

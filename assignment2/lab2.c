@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define ITER 1000000
+#define ITER 1000
 
 
 void componentwise_multiply_real_scalar(int16_t *x,int16_t *y,int16_t *z, uint16_t N);
@@ -207,7 +207,7 @@ int test_routines(uint16_t N, int seed){
     printf("Diff..: %lld (ckt)\nMax...: %lld (ckt)\nTrials: %d (times)\nAvg...: %d\n",
             time_stat.diff, time_stat.max, time_stat.trials, (int)(time_stat.diff/time_stat.trials));
     #elif __PYTHON__
-    printf("SSE4, %d, %lld, %lld, %d, %d\n",
+    printf("AVX2, %d, %lld, %lld, %d, %d\n",
             N, time_stat.diff, time_stat.max, time_stat.trials, (int)(time_stat.diff/time_stat.trials));
     #endif
     #endif

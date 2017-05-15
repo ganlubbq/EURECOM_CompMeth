@@ -13,14 +13,14 @@
 #define ITER 100000
 
 
-void componentwise_multiply_real_scalar(int16_t *x,int16_t *y,int16_t *z, uint16_t N);
+void componentwise_multiply_real_scalar(int16_t *x,int16_t *y,int16_t *z, uint32_t N);
 
 #if defined(__SSE3__) || defined(__SSE4__)
-void componentwise_multiply_real_sse4(int16_t *x, int16_t *y, int16_t *z, uint16_t N);
+void componentwise_multiply_real_sse4(int16_t *x, int16_t *y, int16_t *z, uint32_t N);
 #endif
 
 #if defined(__AVX2__) && defined(__AVX__)
-void componentwise_multiply_real_avx2(int16_t *x, int16_t *y, int16_t *z, uint16_t N);
+void componentwise_multiply_real_avx2(int16_t *x, int16_t *y, int16_t *z, uint32_t N);
 #endif
 
 
@@ -42,7 +42,7 @@ void print128_num(__m128i var)
 }
 
 
-void componentwise_multiply_real_scalar(int16_t *x,int16_t *y,int16_t *z, uint16_t N) {
+void componentwise_multiply_real_scalar(int16_t *x,int16_t *y,int16_t *z, uint32_t N) {
     int i;
     for(i = 0; i < N; i+=8){
         z[i] = x[i] * y[i];
@@ -57,7 +57,7 @@ void componentwise_multiply_real_scalar(int16_t *x,int16_t *y,int16_t *z, uint16
 }
 
 #if defined(__SSE3__) || defined(__SSE4__)
-void componentwise_multiply_real_sse4(int16_t *x, int16_t *y, int16_t *z, uint16_t N) {
+void componentwise_multiply_real_sse4(int16_t *x, int16_t *y, int16_t *z, uint32_t N) {
 
     __m128i *x128 = (__m128i *)x;
     __m128i *y128 = (__m128i *)y;
@@ -79,7 +79,7 @@ void componentwise_multiply_real_sse4(int16_t *x, int16_t *y, int16_t *z, uint16
 #endif
 
 #if defined(__AVX2__) && defined(__AVX__)
-void componentwise_multiply_real_avx2(int16_t *x, int16_t *y, int16_t *z, uint16_t N) {
+void componentwise_multiply_real_avx2(int16_t *x, int16_t *y, int16_t *z, uint32_t N) {
     __m256i *x256 = (__m256i *)x;
     __m256i *y256 = (__m256i *)y;
     __m256i *z256 = (__m256i *)z;

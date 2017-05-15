@@ -14,8 +14,15 @@
 
 
 void componentwise_multiply_real_scalar(int16_t *x,int16_t *y,int16_t *z, uint16_t N);
+
+#if defined(__SSE3__) || defined(__SSE4__)
 void componentwise_multiply_real_sse4(int16_t *x, int16_t *y, int16_t *z, uint16_t N);
+#endif
+
+#if defined(__AVX2__) && defined(__AVX__)
 void componentwise_multiply_real_avx2(int16_t *x, int16_t *y, int16_t *z, uint16_t N);
+#endif
+
 
 int test_routines(uint16_t N, int seed);
 
@@ -49,6 +56,7 @@ void componentwise_multiply_real_scalar(int16_t *x,int16_t *y,int16_t *z, uint16
     }
 }
 
+#if defined(__SSE3__) || defined(__SSE4__)
 void componentwise_multiply_real_sse4(int16_t *x, int16_t *y, int16_t *z, uint16_t N) {
 
     __m128i *x128 = (__m128i *)x;
@@ -68,9 +76,10 @@ void componentwise_multiply_real_sse4(int16_t *x, int16_t *y, int16_t *z, uint16
     }
     z = (int16_t*)z128;
 }
+#endif
 
+#if defined(__AVX2__) && defined(__AVX__)
 void componentwise_multiply_real_avx2(int16_t *x, int16_t *y, int16_t *z, uint16_t N) {
-
     __m256i *x256 = (__m256i *)x;
     __m256i *y256 = (__m256i *)y;
     __m256i *z256 = (__m256i *)z;
@@ -88,7 +97,7 @@ void componentwise_multiply_real_avx2(int16_t *x, int16_t *y, int16_t *z, uint16
     }
     z = (int16_t*)z256;
 }
-
+#endif
 
 int test_routines(uint16_t N, int seed){
 
@@ -111,44 +120,39 @@ int test_routines(uint16_t N, int seed){
         y[i] = (int16_t)rand();
     }
 
-    //printf("X = [ ");
-    //for(i = 0; i < N; i++){
-    //    printf("%d ", x[i]);
-    //}
-    //printf("]\n");
 
-    //printf("Y = [ ");
-    //for(i = 0; i < N; i++){
-    //    printf("%d ", y[i]);
-    //}
-    //printf("]\n");
     #ifdef __DEBUG__
     printf("Starting initial evaluation...\n");
     #endif
 
     componentwise_multiply_real_scalar(x, y, z_scal, N);
-    //printf("Z_scal = [ ");
-    //for(i = 0; i < N; i++){
-    //    printf("%d ", z_scal[i]);
-    //}
-    //printf("]\n");
 
+    #if defined(__SSE3__) || defined(__SSE4__)
     componentwise_multiply_real_sse4(x, y, z_sse4, N);
-    //printf("Z_sse4 = [ ");
-    //for(i = 0; i < N; i++){
-    //    printf("%d ", z_sse4[i]);
-    //}
-    //printf("]\n");
+    #endif
 
+    #if defined(__AVX2__) && defined(__AVX__)
     componentwise_multiply_real_avx2(x, y, z_avx2, N);
+    #endif
 
     for(i = 0; i < N; i++){
-        if(z_scal[i] != z_sse4[i] || z_scal[i] != z_avx2[i]) {
+        #if defined(__SSE3__) || defined(__SSE4__)
+        if(z_scal[i] != z_sse4[i]) {
             #ifdef __DEBUG__
             printf("Inconsistent result in position %d\n Aborting!\n\n", i);
             #endif
             return -1;
         }
+        #endif
+
+        #if defined(__AVX2__) && defined(__AVX__)
+        if(z_scal[i] != z_avx2[i]) {
+            #ifdef __DEBUG__
+            printf("Inconsistent result in position %d\n Aborting!\n\n", i);
+            #endif
+            return -1;
+        }
+        #endif
     }
     #ifdef __DEBUG__
     printf("Initial evaluation completed.\n");
@@ -170,6 +174,7 @@ int test_routines(uint16_t N, int seed){
             N, time_stat.diff, time_stat.max, time_stat.trials, (int)(time_stat.diff/time_stat.trials));
     #endif
 
+    #if defined(__SSE3__) || defined(__SSE4__)
     #ifdef __DEBUG__
     printf("\nStarting SSE4 implementation evaluation...\n");
     #endif
@@ -186,8 +191,9 @@ int test_routines(uint16_t N, int seed){
     printf("SSE4, %d, %lld, %lld, %d, %d\n",
             N, time_stat.diff, time_stat.max, time_stat.trials, (int)(time_stat.diff/time_stat.trials));
     #endif
+    #endif
 
-
+    #if defined(__AVX2__) && defined(__AVX__)
     #ifdef __DEBUG__
     printf("\nStarting AVX2 implementation evaluation...\n");
     #endif
@@ -204,6 +210,6 @@ int test_routines(uint16_t N, int seed){
     printf("SSE4, %d, %lld, %lld, %d, %d\n",
             N, time_stat.diff, time_stat.max, time_stat.trials, (int)(time_stat.diff/time_stat.trials));
     #endif
-
+    #endif
     return 0;
 }

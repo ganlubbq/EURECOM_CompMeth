@@ -24,7 +24,7 @@ void componentwise_multiply_real_avx2(int16_t *x, int16_t *y, int16_t *z, uint16
 #endif
 
 
-int test_routines(uint16_t N, int seed);
+int test_routines(uint32_t N, int seed);
 
 int main(int argc, char **argv) {
 

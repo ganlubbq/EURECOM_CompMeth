@@ -19,7 +19,7 @@ touch sse_O1.csv
 for N in 16 32 64 128 256 512 1024 2048 4096 8192 16384	32768
 do
   echo "Testing N = "$N
-  ./lab2 $N > sse_O1.csv
+  ./lab2 $N >> sse_O1.csv
 done
 
 make clean
@@ -43,5 +43,5 @@ touch sse_O3.csv
 for N in 16 32 64 128 256 512 1024 2048 4096 8192 16384	32768
 do
   echo "Testing N = "$N
-  ./lab2 $N > sse_O3.csv
+  ./lab2 $N >> sse_O3.csv
 done

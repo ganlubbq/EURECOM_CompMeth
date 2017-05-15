@@ -1,9 +1,9 @@
 CC = gcc
 
-CFLAGS = -Wall -mmmx -msse -msse2 -mssse3 -msse4
+CFLAGS = -Wall -mmmx -msse -msse2 -mssse3 -msse4 -mavx2 -O0 -D__DEBUG__ -g -ggdb -fno-unroll-loops 
 
 # Utility routines
-UTIL_OBJS += lab2.o 
+UTIL_OBJS += lab2.o
 
 #
 
@@ -13,9 +13,8 @@ OBJ = $(UTIL_OBJS)
 $(OBJ) : %.o : %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-ffttest: $(OBJ) lab2.o
-	$(CC)  $(OBJ) lab2.o -o lab2
+fft: $(OBJ)
+	$(CC)  $(OBJ) -o lab2
 
 clean:
-	rm -f *.o 
-
+	rm -f *.o

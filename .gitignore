@@ -3,3 +3,5 @@
 *.fdb_latexmk
 *.fls
 *.log
+*.ipynb
+*.TODO

@@ -1,0 +1,21 @@
+mkdir -p test15/
+mkdir -p test24/
+mkdir -p fig/
+
+for TEST in 0 1 2
+do
+  for N in 64 256 1024 4096
+  do
+    echo "Starting test n. ${TEST} with N = ${N}"
+    for RUN in 0 1 2 3 4
+    do
+        echo "    Starting run n. ${RUN} in Q15 "
+        ./fft15 $N $TEST | cut -f 1,2 -d ',' | tr ',' ' '  | sed '1d' > test15/TEST_${TEST}_N_${N}_RUN_${RUN}.txt
+        echo "    Run concluded"
+    done
+    echo "Test concluded"
+  done
+done
+
+echo ""
+echo "Distortion test completed"

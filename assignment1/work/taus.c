@@ -8,7 +8,7 @@ The present document specifies several numerical functions for testing of digita
 
 @defgroup numerical
 
-@defgroup _taus 
+@defgroup _taus
 @ingroup numerical Tausworthe Uniform Random Variable Generator.*/
 
 
@@ -18,21 +18,12 @@ unsigned int s0, s1, s2, b;
 
 //----------------------------------------------
 //
-/*!\brief Tausworthe Uniform Random Generator.  This is based on the hardware implementation described in 
+/*!\brief Tausworthe Uniform Random Generator.  This is based on the hardware implementation described in
   Lee et al, "A Hardware Gaussian Noise Generator Usign the Box-Muller Method and its Error Analysis," IEEE Trans. on Computers, 2006.
 */
 //
 
-unsigned int taus() {
 
-  b = (((s0 << 13) ^ s0) >> 19);
-  s0 = (((s0 & 0xFFFFFFFE) << 12)^  b);
-  b = (((s1 << 2) ^ s1) >> 25);
-  s1 = (((s1 & 0xFFFFFFF8) << 4)^  b);
-  b = (((s2 << 3) ^ s2) >> 11);
-  s2 = (((s2 & 0xFFFFFFF0) << 17)^  b);
-  return s0 ^ s1 ^ s2;
-}
 
 void set_taus_seed() {
 
@@ -41,6 +32,17 @@ void set_taus_seed() {
   s1 = (unsigned int)time(NULL); //0x81f38a1c;
   s2 = (unsigned int)time(NULL); //0xfe1a133e;
 
+}
+
+unsigned int taus() {
+  //set_taus_seed();
+  b = (((s0 << 13) ^ s0) >> 19);
+  s0 = (((s0 & 0xFFFFFFFE) << 12)^  b);
+  b = (((s1 << 2) ^ s1) >> 25);
+  s1 = (((s1 & 0xFFFFFFF8) << 4)^  b);
+  b = (((s2 << 3) ^ s2) >> 11);
+  s2 = (((s2 & 0xFFFFFFF0) << 17)^  b);
+  return s0 ^ s1 ^ s2;
 }
 
 #ifdef MAIN
@@ -59,6 +61,3 @@ main() {
   }
 }
 #endif MAIN
-
-  
-  

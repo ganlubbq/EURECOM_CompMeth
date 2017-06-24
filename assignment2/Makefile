@@ -1,6 +1,8 @@
-CC = gcc
+CC = icc
 
-override CFLAGS += -Wall -mmmx -msse -msse2 -mssse3 -msse4 -D__PYTHON__ -g -ggdb 
+#override CFLAGS += -mavx2 -Wall -mmmx -msse -msse2 -mssse3 -msse4 -D__PYTHON__ -g -ggdb
+#-march=core-avx2
+override CFLAGS += -Wall -mssse3 -march=core-avx2 -O3 -D__PYTHON__ -g3 -ggdb
 
 # Utility routines
 UTIL_OBJS += lab2.o

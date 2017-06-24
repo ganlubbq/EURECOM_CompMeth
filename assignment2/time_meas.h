@@ -2,6 +2,8 @@
 #include <omp.h>
 #endif
 
+#include <x86intrin.h>
+
 typedef struct {
 
   long long in;
@@ -22,10 +24,12 @@ static inline unsigned long long rdtsc_oai(void) {
 }
 #elif defined(__x86_64__)
 static inline unsigned long long rdtsc_oai() __attribute__((always_inline));
-static inline unsigned long long rdtsc_oai() { 
-  unsigned long long a, d;
-  __asm__ volatile ("rdtsc" : "=a" (a), "=d" (d));
-  return (d<<32) | a;
+static inline unsigned long long rdtsc_oai() {
+  //unsigned long long a, d;
+  //__asm__ volatile ("rdtsc" : "=a" (a), "=d" (d));
+  //return (d<<32) | a;
+    unsigned int dummy;
+    return   __rdtscp(&dummy);
 }
 #endif
 
@@ -56,7 +60,7 @@ static inline void stop_meas(time_stats_t *ts) {
       ts->diff += (out-ts->in);
       if ((out-ts->in) > ts->max)
 	ts->max = out-ts->in;
-      
+
     }
 }
 
